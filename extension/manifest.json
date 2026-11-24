@@ -1,0 +1,49 @@
+{
+  "manifest_version": 3,
+  "name": "NepaChrome: Sovereign AI Research Workstation",
+  "version": "2.0",
+  "description": "Local-first Devanagari NLP research assistant, bilingual reader, and dataset harvester.",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting",
+    "sidePanel"
+  ],
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "host_permissions": [
+    "http://localhost:8001/*",
+    "http://127.0.0.1:8001/*",
+    "http://localhost:11434/*",
+    "http://127.0.0.1:11434/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["styles.css"]
+    }
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "options_page": "settings.html",
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "icons": {
+    "48": "icon.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "sidepanel.html",
+        "sidepanel.js",
+        "modules/*.js"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NepaChrome Settings</title>
+    <style>
+        body {
+            background: #ffffff; color: #202124;
+            font-family: 'Inter', -apple-system, sans-serif;
+            padding: 48px; max-width: 680px; margin: 0 auto;
+        }
+        h1 { font-size: 26px; font-weight: 500; margin-bottom: 8px; }
+        .subtitle { color: #70757a; margin-bottom: 36px; font-size: 14px; }
+        
+        .section { margin-bottom: 36px; padding-bottom: 28px; border-bottom: 1px solid #f1f3f4; }
+        .label { font-size: 14px; font-weight: 600; margin-bottom: 6px; color: #3c4043; }
+        .desc { font-size: 13px; color: #70757a; margin-bottom: 14px; line-height: 1.5; }
+        
+        select, input {
+            width: 100%; padding: 10px 14px; border: 1px solid #dadce0;
+            border-radius: 6px; font-size: 14px; margin-bottom: 12px;
+            box-sizing: border-box; outline: none; transition: border-color 0.2s;
+        }
+        select:focus, input:focus { border-color: #1a73e8; }
+        
+        .card-group {
+            margin-top: 14px; padding: 16px; background: #f8f9fa;
+            border: 1px solid #e8eaed; border-radius: 8px;
+        }
+        
+        .btn {
+            background: #1a73e8; color: white; border: none;
+            padding: 10px 24px; border-radius: 6px; cursor: pointer;
+            font-weight: 500; font-size: 14px; transition: background 0.2s;
+        }
+        .btn:hover { background: #1765cc; }
+        .btn-secondary {
+            background: #ffffff; color: #3c4043; border: 1px solid #dadce0;
+            margin-right: 8px;
+        }
+        .btn-secondary:hover { background: #f1f3f4; }
+        
+        .badge {
+            display: inline-block; padding: 4px 10px; border-radius: 12px;
+            font-size: 12px; font-weight: 500; margin-left: 8px;
+        }
+        .badge-online { background: #e6f4ea; color: #137333; }
+        .badge-offline { background: #fef7e0; color: #b06000; }
+
+        .status-msg {
+            margin-top: 16px; font-size: 13px; font-weight: 500; display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>✨ NepaChrome Settings</h1>
+    <div class="subtitle">Configure your sovereign, local-first Devanagari AI research workstation.</div>
+
+    <!-- AI Intelligence Engine -->
+    <div class="section">
+        <div class="label">Local Intelligence Engine</div>
+        <div class="desc">Select the local model provider. Both options run 100% offline on your device with <b>zero cloud keys or tracking</b>.</div>
+        <select id="ai-provider">
+            <option value="chrome">Chrome Built-in AI (Gemini Nano via Prompt API) [Default]</option>
+            <option value="ollama">Local Ollama / OpenAI-Compatible (TODO / Local Endpoint)</option>
+        </select>
+
+        <div id="ollama-group" class="card-group" style="display: none;">
+            <div class="label">Ollama API Endpoint</div>
+            <div class="desc">OpenAI-compatible completions endpoint for local models.</div>
+            <input type="text" id="ollama-endpoint" placeholder="http://localhost:11434/v1">
+
+            <div class="label" style="margin-top: 12px;">Model Name</div>
+            <div class="desc">Local model tag pulled in Ollama (e.g. llama3.2, mistral, qwen2.5).</div>
+            <input type="text" id="ollama-model" placeholder="llama3.2">
+            <small style="color: #70757a;">📌 Optional/TODO: No installation required if you use Chrome Built-in AI.</small>
+        </div>
+    </div>
+
+    <!-- Sovereign Hub Backend -->
+    <div class="section">
+        <div class="label">
+            Sovereign Hub Backend (FastAPI)
+            <span id="hub-connection-badge" class="badge badge-offline">Checking...</span>
+        </div>
+        <div class="desc">Local server for data persistence, research analytics, and dataset harvesting. Runs at <code>localhost:8001</code>.</div>
+        <input type="text" id="hub-url" placeholder="http://localhost:8001">
+
+        <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
+            <button class="btn btn-secondary" id="test-hub-btn">Test Connection</button>
+            <button class="btn btn-secondary" id="sync-hub-btn">Sync Buffered Data</button>
+        </div>
+        <div id="hub-test-result" class="status-msg"></div>
+
+        <div class="card-group" style="margin-top: 16px;">
+            <div class="label">Offline Buffer Status</div>
+            <div class="desc" id="buffer-summary">Loading buffer status...</div>
+        </div>
+    </div>
+
+    <button class="btn" id="save-settings">Save Settings</button>
+    <div id="save-status" class="status-msg" style="color: #137333;">✓ Settings saved successfully.</div>
+
+    <script type="module" src="settings.js"></script>
+</body>
+</html>

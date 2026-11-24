@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sovereign Command Center | USIH V3.0</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --primary: #00f2fe;
+            --secondary: #4facfe;
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+            padding: 1.5rem;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .header-title h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .gsci-badge {
+            background: rgba(0, 242, 254, 0.1);
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        .chart-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        .domain-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .domain-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .domain-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--primary);
+        }
+
+        .domain-name {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .domain-score {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .progress-mini {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            transition: width 1s ease-in-out;
+        }
+
+        .insights-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        .insight-item {
+            padding: 1rem;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border-left: 4px solid var(--secondary);
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #22c55e;
+            box-shadow: 0 0 10px #22c55e;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .live-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: #ef4444;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-title">
+                <h1>Sovereign Command Center</h1>
+                <div class="live-status">
+                    <div class="live-dot"></div>
+                    REAL-TIME INTEL ACTIVE
+                </div>
+            </div>
+            <div id="gsci-container">
+                <span class="gsci-badge">GSCI: <span id="gsci-value">0.0</span>%</span>
+            </div>
+        </header>
+
+        <div class="main-grid">
+            <section class="chart-section">
+                <h2 style="margin-bottom: 1.5rem; font-weight: 600;">Global Cohesion Audit</h2>
+                <canvas id="cohesionChart"></canvas>
+            </section>
+
+            <section class="insights-section">
+                <h2 style="margin-bottom: 1.5rem; font-weight: 600;">Synergy Insights</h2>
+                <div id="insights-list">
+                    <!-- Dynamic insights -->
+                </div>
+            </section>
+        </div>
+
+        <div class="domain-grid" id="domain-grid" style="margin-top: 2rem;">
+            <!-- Dynamic domain cards -->
+        </div>
+    </div>
+
+    <script>
+        let chart;
+
+        async function updateDashboard() {
+            try {
+                const response = await fetch('/nc-hub/v1/sovereign/status');
+                const data = await response.json();
+
+                // Update GSCI
+                document.getElementById('gsci-value').innerText = data.GSCI.toFixed(1);
+
+                // Update Domains
+                const grid = document.getElementById('domain-grid');
+                grid.innerHTML = '';
+                
+                const labels = [];
+                const values = [];
+
+                for (const [name, score] of Object.entries(data.DomainResults)) {
+                    labels.push(name);
+                    values.push(score);
+
+                    const card = document.createElement('div');
+                    card.className = 'domain-card';
+                    card.innerHTML = `
+                        <div class="domain-name">${name}</div>
+                        <div class="domain-score">${score.toFixed(1)}%</div>
+                        <div class="progress-mini">
+                            <div class="progress-fill" style="width: ${score}%"></div>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                }
+
+                // Update Insights
+                const insightsList = document.getElementById('insights-list');
+                insightsList.innerHTML = '';
+                data.SynergyAnalysis.forEach(insight => {
+                    const item = document.createElement('div');
+                    item.className = 'insight-item';
+                    item.innerHTML = `
+                        <div class="status-indicator" style="background: ${insight.includes('WARNING') ? '#eab308' : insight.includes('CRITICAL') ? '#ef4444' : '#22c55e'}"></div>
+                        <div class="insight-text">${insight}</div>
+                    `;
+                    insightsList.appendChild(item);
+                });
+
+                // Update Chart
+                if (!chart) {
+                    const ctx = document.getElementById('cohesionChart').getContext('2d');
+                    chart = new Chart(ctx, {
+                        type: 'radar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Domain Performance',
+                                data: values,
+                                backgroundColor: 'rgba(0, 242, 254, 0.2)',
+                                borderColor: '#00f2fe',
+                                borderWidth: 2,
+                                pointBackgroundColor: '#00f2fe'
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                r: {
+                                    angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                                    grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                    pointLabels: { color: '#94a3b8', font: { size: 12 } },
+                                    ticks: { display: false },
+                                    suggestedMin: 0,
+                                    suggestedMax: 100
+                                }
+                            },
+                            plugins: {
+                                legend: { display: false }
+                            }
+                        }
+                    });
+                } else {
+                    chart.data.labels = labels;
+                    chart.data.datasets[0].data = values;
+                    chart.update();
+                }
+
+            } catch (error) {
+                console.error('Failed to update dashboard:', error);
+            }
+        }
+
+        // Initial update and periodic refresh
+        updateDashboard();
+        setInterval(updateDashboard, 5000);
+    </script>
+</body>
+</html>

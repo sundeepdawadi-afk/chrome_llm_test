@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>NepaChrome</title>
+    <style>
+        body {
+            width: 320px; padding: 20px; font-family: 'Inter', sans-serif;
+            background: #fff; color: #202124; margin: 0;
+        }
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 24px;
+        }
+        h2 { font-size: 18px; font-weight: 500; margin: 0; }
+        .gear { cursor: pointer; font-size: 18px; transition: transform 0.2s; }
+        .gear:hover { transform: rotate(45deg); }
+        
+        .status-badge {
+            background: #e6f4ea; color: #1e8e3e; border-radius: 4px;
+            padding: 8px 12px; font-size: 13px; font-weight: 500;
+            display: flex; align-items: center; gap: 8px; margin-bottom: 24px;
+        }
+        
+        .about-box {
+            background: #f8f9fa; border-radius: 8px; padding: 16px;
+            font-size: 13px; color: #3c4043; line-height: 1.5;
+        }
+        .footer {
+            margin-top: 24px; border-top: 1px solid #f1f3f4; padding-top: 16px;
+            display: flex; justify-content: space-between; font-size: 12px;
+        }
+        .link { color: #1a73e8; cursor: pointer; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>✨ NepaChrome</h2>
+        <div class="gear" id="go-to-settings">⚙️</div>
+    </div>
+
+    <div id="status-badge" class="status-badge">
+        <span>🧠</span> Detecting Local AI...
+    </div>
+
+    <div id="hub-badge" class="status-badge" style="background: #f1f3f4; color: #5f6368; cursor: pointer;" title="Click to test Hub connection or sync">
+        <span>📡</span> Checking Hub...
+    </div>
+
+    <div id="sync-container" style="display: none; background: #fef7e0; color: #b06000; padding: 8px 12px; border-radius: 4px; font-size: 12px; margin-bottom: 20px; justify-content: space-between; align-items: center;">
+        <span id="pending-count">0 items buffered offline</span>
+        <button id="sync-now-btn" style="background: #1a73e8; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;">Sync Now</button>
+    </div>
+
+    <div class="toggle-group" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding: 0 4px;">
+        <span style="font-size: 14px; font-weight: 500;">Bilingual Mode</span>
+        <input type="checkbox" id="toggle-immersive" style="width: 40px; height: 20px; cursor: pointer;">
+    </div>
+
+    <div style="margin-bottom: 24px; text-align: center;">
+        <a href="http://localhost:8001/playground" target="_blank" class="link" style="font-weight: 600; font-size: 14px;">🚀 Open Live AI Playground</a>
+    </div>
+
+    <div class="about-box">
+        <b>Sovereign AI Hub</b><br>
+        A privacy-first Nepali research assistant. Use the "N" bubble on any page to translate, summarize, or take notes.
+    </div>
+
+    <div class="footer">
+        <span>v2.0.0</span>
+        <span class="link" id="clear-storage">Clear Local Cache</span>
+    </div>
+
+    <script type="module" src="popup.js"></script>
+</body>
+</html>

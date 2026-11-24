@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NepaChrome | Sovereign AI Lab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --primary-bg: #e8f0fe;
+            --surface: #ffffff;
+            --bg: #f8f9fa;
+            --sidebar: #f1f3f4;
+            --text-main: #202124;
+            --text-sub: #5f6368;
+            --border: #dadce0;
+            --shadow: 0 1px 3px rgba(0,0,0,0.12);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar Architecture */
+        .sidebar {
+            width: 300px;
+            background: var(--sidebar);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            z-index: 10;
+        }
+
+        .sidebar h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 22px;
+            margin: 0 0 32px 0;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-section {
+            margin-bottom: 32px;
+        }
+
+        .nav-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-sub);
+            letter-spacing: 0.8px;
+            margin-bottom: 12px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .nav-item:hover { background: rgba(0,0,0,0.04); }
+        .nav-item.active { background: var(--primary-bg); color: var(--primary); }
+
+        /* Main Workspace */
+        .workspace {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .header {
+            padding: 16px 40px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .view-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 40px 15%;
+            scroll-behavior: smooth;
+        }
+
+        /* Chat/Results Styling */
+        .bubble {
+            max-width: 85%;
+            margin-bottom: 32px;
+            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .bubble.user { margin-left: auto; text-align: right; }
+        .bubble.user .content {
+            background: var(--primary);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 24px 24px 4px 24px;
+            display: inline-block;
+        }
+
+        .bubble.ai .content {
+            background: white;
+            border: 1px solid var(--border);
+            padding: 24px;
+            border-radius: 4px 24px 24px 24px;
+            box-shadow: var(--shadow);
+            line-height: 1.6;
+        }
+
+        /* Input Deck */
+        .input-deck {
+            padding: 24px 15%;
+            background: linear-gradient(transparent, var(--bg) 20%);
+        }
+
+        .input-wrapper {
+            position: relative;
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+        }
+
+        .input-box {
+            flex: 1;
+            border: none;
+            padding: 12px 16px;
+            font-size: 16px;
+            outline: none;
+            background: transparent;
+        }
+
+        .send-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+
+        .send-btn:hover { transform: scale(1.1); }
+
+        /* Action Buttons */
+        .btn-outline {
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-outline:hover { background: var(--bg); border-color: var(--text-sub); }
+
+        /* Diagnostics */
+        .diag-item {
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 4px 8px;
+            background: white;
+            border-radius: 6px;
+        }
+
+        .status-badge {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .ready { color: #1e8e3e; background: #e6f4ea; }
+        .downloading { color: #1a73e8; background: #e8f0fe; animation: pulse 1.5s infinite; }
+        .error { color: #d93025; background: #fce8e6; }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h1><span>✨</span> NepaChrome</h1>
+        
+        <div class="nav-section">
+            <div class="nav-label">Research Modules</div>
+            <div class="nav-item active" data-mode="CHAT">💬 Sovereign Chat</div>
+            <div class="nav-item" data-mode="SUMMARIZE">📝 Recursive Summarizer</div>
+            <div class="nav-item" data-mode="TRANSLATE">🌐 Pro Translator</div>
+            <div class="nav-item" data-mode="PROOFREAD">🔎 Smart Proofreader</div>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-label">Model Diagnostics</div>
+            <div id="diag-list">
+                <div class="diag-item"><span>Prompt API</span> <span class="status-badge" id="st-prompt">Checking...</span></div>
+                <div class="diag-item"><span>Summarizer</span> <span class="status-badge" id="st-sum">Checking...</span></div>
+                <div class="diag-item"><span>Translator</span> <span class="status-badge" id="st-trans">Checking...</span></div>
+            </div>
+        </div>
+
+        <div style="margin-top: auto;">
+            <button class="btn-outline" style="width:100%" onclick="location.reload()">🔄 Refresh Hub</button>
+        </div>
+    </div>
+
+    <div class="workspace">
+        <div class="header">
+            <h3 id="view-title" style="margin:0; font-family:'Outfit'; font-weight:500;">Sovereign Chat</h3>
+            <div style="display:flex; gap:12px;">
+                <button class="btn-outline" id="save-chat">💾 Archive to Server</button>
+                <button class="btn-outline" onclick="clearOutput()">🗑️ Clear</button>
+            </div>
+        </div>
+
+        <div class="view-content" id="chat-output">
+            <div class="bubble ai">
+                <div class="content">
+                    नमस्ते! I am your <b>Sovereign AI Research Assistant</b>, powered by Gemini Nano. 
+                    I run entirely on your hardware. What shall we investigate today?
+                </div>
+            </div>
+        </div>
+
+        <div class="input-deck">
+            <div class="input-wrapper">
+                <input type="text" class="input-box" id="user-input" placeholder="Enter research prompt or text to process...">
+                <button class="send-btn" id="send-btn">➔</button>
+            </div>
+            <p style="text-align:center; font-size:11px; color:var(--text-sub); margin-top:12px;">
+                NepaChrome Laboratory | Data stays on this device.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        let currentMode = 'CHAT';
+        let history = [];
+        let activeSession = null;
+
+        // UNIVERSAL AI RESOLVER
+        const getAI = () => {
+            return {
+                prompt: window.LanguageModel || window.ai?.languageModel || window.ai?.assistant,
+                summarizer: window.Summarizer || window.ai?.summarizer,
+                translator: window.Translator || window.ai?.translator,
+                detector: window.LanguageDetector || window.ai?.languageDetector
+            };
+        };
+
+        // Initialize Diagnostics
+        async function checkStatus() {
+            const ai = getAI();
+            const check = async (api, elId) => {
+                const el = document.getElementById(elId);
+                if (!api) {
+                    if (elId === 'st-trans' && ai.prompt) {
+                        el.textContent = 'HYBRID READY';
+                        el.className = 'status-badge ready';
+                        return;
+                    }
+                    el.textContent = 'DISABLED';
+                    el.className = 'status-badge error';
+                    return;
+                }
+                try {
+                    const status = await api.availability();
+                    el.textContent = status;
+                    el.className = 'status-badge ' + (status === 'available' ? 'ready' : (status === 'unavailable' ? 'error' : 'downloading'));
+                } catch(e) { 
+                    el.textContent = 'NO FLAG'; 
+                    el.className = 'status-badge error'; 
+                }
+            };
+
+            await check(ai.prompt, 'st-prompt');
+            await check(ai.summarizer, 'st-sum');
+            await check(ai.translator, 'st-trans');
+        }
+        checkStatus();
+
+        // View Switching
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.onclick = () => {
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                currentMode = item.dataset.mode;
+                document.getElementById('view-title').textContent = item.textContent;
+                addMessage('ai', `Activated <b>${currentMode}</b> module. Ready for input.`);
+            };
+        });
+
+        async function processInput() {
+            const input = document.getElementById('user-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const ai = getAI();
+            addMessage('user', text);
+            input.value = '';
+            
+            const loading = addMessage('ai', '⚡ <i>Inference in progress...</i>');
+            
+            try {
+                let result = "";
+                if (currentMode === 'CHAT') {
+                    if (!ai.prompt) throw new Error("Prompt API (Gemini Nano) is not enabled in flags.");
+                    if (!activeSession) activeSession = await ai.prompt.create({
+                        systemPrompt: "You are a highly capable Nepali/English bilingual research assistant. Focus on accuracy and cultural context.",
+                        expectedInputs: [{ type: 'text', languages: ['en', 'ne'] }],
+                        expectedOutputs: [{ type: 'text', languages: ['en', 'ne'] }]
+                    });
+                    result = await activeSession.prompt(text);
+                } 
+                else if (currentMode === 'SUMMARIZE') {
+                    if (!ai.summarizer) throw new Error("Summarizer API is not enabled in flags.");
+                    const summarizer = await ai.summarizer.create({ 
+                        type: 'key-points',
+                        format: 'markdown',
+                        length: 'medium'
+                    });
+                    result = await summarizer.summarize(text);
+                } 
+                else if (currentMode === 'TRANSLATE') {
+                    try {
+                        if (!ai.translator) throw new Error("Native Translator missing");
+                        const translator = await ai.translator.create({ 
+                            sourceLanguage: 'en', 
+                            targetLanguage: 'ne' 
+                        });
+                        result = await translator.translate(text);
+                    } catch (e) {
+                        console.log("Pivoting to Hybrid Translation via Gemini Nano...");
+                        if (!ai.prompt) throw new Error("Translator API unsupported and Prompt API fallback not available.");
+                        const translatorSession = await ai.prompt.create({
+                            systemPrompt: "You are a professional English to Nepali translator. Provide high-fidelity, culturally accurate translations. Output ONLY the translated text.",
+                            expectedInputs: [{ type: 'text', languages: ['en'] }],
+                            expectedOutputs: [{ type: 'text', languages: ['ne'] }]
+                        });
+                        result = await translatorSession.prompt(`Translate this to Nepali: ${text}`);
+                    }
+                }
+                else if (currentMode === 'PROOFREAD') {
+                    if (!ai.prompt) throw new Error("Proofreading requires the Prompt API.");
+                    const session = await ai.prompt.create({
+                        expectedInputs: [{ type: 'text', languages: ['en', 'ne'] }],
+                        expectedOutputs: [{ type: 'text', languages: ['en', 'ne'] }]
+                    });
+                    result = await session.prompt(`Proofread and correct this text, preserving its original meaning: ${text}`);
+                }
+
+                loading.innerHTML = result;
+                history.push({ mode: currentMode, user: text, ai: result, time: new Date().toISOString() });
+            } catch (err) {
+                loading.innerHTML = `<span style="color:#d93025"><b>System Error:</b> ${err.message}</span><br><br><small>Tip: Check chrome://flags for 'Gemini Nano' and 'Prompt API'</small>`;
+            }
+        }
+
+        function addMessage(role, html) {
+            const container = document.getElementById('chat-output');
+            const bubble = document.createElement('div');
+            bubble.className = `bubble ${role}`;
+            bubble.innerHTML = `<div class="content">${html}</div>`;
+            container.appendChild(bubble);
+            container.scrollTop = container.scrollHeight;
+            return bubble.querySelector('.content');
+        }
+
+        function clearOutput() {
+            document.getElementById('chat-output').innerHTML = '';
+            activeSession = null;
+        }
+
+        document.getElementById('send-btn').onclick = processInput;
+        document.getElementById('user-input').onkeydown = e => { if(e.key === 'Enter') processInput(); };
+
+        document.getElementById('save-chat').onclick = async () => {
+            if (history.length === 0) return;
+            const res = await fetch('/nc-hub/v1/save-chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ history })
+            });
+            if (res.ok) alert("✓ Research session archived to server.");
+        };
+    </script>
+</body>
+</html>
